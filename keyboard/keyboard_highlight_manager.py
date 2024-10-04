@@ -1,3 +1,5 @@
+import time
+
 from keyboard.keyboard_logger import EventLogger
 
 
@@ -61,7 +63,7 @@ class HighlightManager:
         if self.cycles >= self.max_cycles:
             self.cycles = 0
             self.keyboard.current_letter_idx += 1
-
+            time.sleep(10)
             # Проверяем, завершилось ли слово
             if self.keyboard.current_letter_idx >= len(self.keyboard.target_word):
                 self.stop()
