@@ -1,3 +1,6 @@
+from keyboard.keyboard_logger import EventLogger
+
+
 class HighlightManager:
     """Класс управления подсветкой строк и столбцов"""
 
@@ -17,35 +20,53 @@ class HighlightManager:
             self.keyboard.root.after_cancel(self.process)
 
     def highlight_cycle(self):
-        """Цикл подсветки строк и столбцов"""
+        """Цикл подсветки строк и столбцов с проверкой и логированием"""
 
         row_count = len(self.keyboard.layout)
         col_count = len(self.keyboard.layout[0])
 
-        print(self.highlight_counter)
+        # Подсветка строки
+        if self.highlight_counter < row_count:
+            current_row = self.highlight_counter
+            self.keyboard.highlight(row=current_row)
 
-        if self.highlight_counter < row_count:  # Подсветка строки
-            self.keyboard.highlight(row=self.highlight_counter)
-            for c in range(col_count):
-                self.keyboard.check_letter(self.highlight_counter, c)
+            # Проверяем, содержится ли текущая буква в этой строке
+            letter_found = any(
+                self.keyboard.layout[current_row][c] == self.keyboard.target_word[self.keyboard.current_letter_idx] for
+                c in range(col_count))
+            self.keyboard.check_letter(row=current_row, cycle_count=self.cycles)
+            EventLogger.log_event(current_row, None, letter_found)
 
-        else:  # Подсветка столбца
-            col_index = self.highlight_counter - row_count
-            self.keyboard.highlight(col=col_index)
-            for r in range(row_count):
-                self.keyboard.check_letter(r, col_index)
+        # Подсветка столбца
+        elif self.highlight_counter < row_count + col_count:
+            current_col = self.highlight_counter - row_count
+            self.keyboard.highlight(col=current_col)
 
+            # Проверяем, содержится ли текущая буква в этом столбце
+            letter_found = any(
+                self.keyboard.layout[r][current_col] == self.keyboard.target_word[self.keyboard.current_letter_idx] for
+                r in range(row_count))
+            self.keyboard.check_letter(col=current_col, cycle_count=self.cycles)
+            EventLogger.log_event(None, current_col, letter_found)
+
+        # Увеличиваем счетчик для подсветки следующей строки или столбца
         self.highlight_counter += 1
 
-        # Если прошли все строки и столбцы, увеличиваем цикл и сбрасываем счётчик
+        # Если цикл завершился (прошли все строки и столбцы), начинаем новый цикл
         if self.highlight_counter >= row_count + col_count:
             self.highlight_counter = 0
             self.cycles += 1
 
-        # Проверяем, завершилось ли требуемое количество циклов
+        # Проверяем, завершилось ли требуемое количество циклов для текущей буквы
         if self.cycles >= self.max_cycles:
-            self.stop()
-            return
+            self.cycles = 0
+            self.keyboard.current_letter_idx += 1
+
+            # Проверяем, завершилось ли слово
+            if self.keyboard.current_letter_idx >= len(self.keyboard.target_word):
+                self.stop()
+                return
 
         # Планируем следующий шаг через заданный интервал
         self.process = self.keyboard.root.after(self.interval, self.highlight_cycle)
+

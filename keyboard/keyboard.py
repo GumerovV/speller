@@ -7,19 +7,33 @@ class VirtualKeyboard:
         self.root = root
         self.layout = layout
         self.target_word = target_word
+        self.user_output = ''
         self.current_letter_idx = 0
         self.buttons = []
+        self.create_target_word_label()
+        self.create_user_output_label()
         self.create_keyboard()
+
+    def create_target_word_label(self):
+        self.word_label = tk.Label(self.root, text=self.target_word,
+                                   font=('Arial', 24, 'bold'), bg="black", fg="sky blue")
+        self.word_label.grid(row=0, column=0, columnspan=len(self.layout[0]))
+
+    def create_user_output_label(self):
+        self.user_output_label = tk.Label(self.root, text=self.user_output,
+                                   font=('Arial', 24, 'bold'), bg="black", fg="sky blue")
+        self.user_output_label.grid(row=1, column=0, columnspan=len(self.layout[0]), pady=10)
 
     def create_keyboard(self):
         """Создание сетки кнопок (клавиатуры)"""
+
         for r in range(len(self.layout)):
             row_buttons = []
             for c in range(len(self.layout[0])):
                 button = tk.Button(self.root, text=self.layout[r][c], width=5, height=2,
                                    bg="black", fg="sky blue", font=('Arial', 18, 'bold'),
                                    relief=tk.FLAT)
-                button.grid(row=r, column=c, padx=5, pady=5)
+                button.grid(row=r+15, column=c, padx=5, pady=5)
                 row_buttons.append(button)
             self.buttons.append(row_buttons)
 
@@ -38,20 +52,22 @@ class VirtualKeyboard:
             for r in range(len(self.layout)):
                 self.buttons[r][col].config(bg="white", fg="black", relief=tk.GROOVE)
 
-    def check_letter(self, row, col):
-        """Проверка выбранной буквы и логирование события"""
+    def check_letter(self, row=None, col=None, cycle_count=None):
+        """Проверка текущего символа и логирование событий"""
         current_letter = self.target_word[self.current_letter_idx]
-        selected_letter = self.layout[row][col]
-        correct = (selected_letter == current_letter)
 
-        # Логируем событие
-        EventLogger.log_event(row, col, correct)
+        if row is not None:  # Проверяем строку
+            selected_letters = [self.layout[row][c] for c in range(len(self.layout[0]))]
+            if current_letter in selected_letters:
+                print(f"Буква '{current_letter}' найдена в строке {row}")
 
-        # Если выбранная буква правильная, переходим к следующей букве
-        if correct:
-            self.current_letter_idx += 1
-            if self.current_letter_idx >= len(self.target_word):
-                print("Слово написано!")
-                self.current_letter_idx = 0
-                return True
-        return False
+        if col is not None:  # Проверяем колонку
+            selected_letters = [self.layout[r][col] for r in range(len(self.layout))]
+            if current_letter in selected_letters:
+                print(f"Буква '{current_letter}' найдена в колонке {col}")
+                if cycle_count == 2:
+                    self.user_output += current_letter
+                    self.user_output_label.config(text=self.user_output)
+                    print(f"Add {current_letter}")
+
+
