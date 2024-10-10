@@ -32,10 +32,15 @@ class VirtualKeyboard:
             for c in range(len(self.layout[0])):
                 button = tk.Button(self.root, text=self.layout[r][c], width=5, height=2,
                                    bg="black", fg="sky blue", font=('Arial', 18, 'bold'),
-                                   relief=tk.FLAT)
+                                   relief=tk.GROOVE)
                 button.grid(row=r+15, column=c, padx=5, pady=5)
                 row_buttons.append(button)
             self.buttons.append(row_buttons)
+
+    def clear_highlight(self):
+        for r in range(len(self.layout)):
+            for c in range(len(self.layout[0])):
+                self.buttons[r][c].config(bg="black", fg="sky blue")
 
     def highlight(self, row=None, col=None):
         """Подсветка строки или столбца с закругленными белыми областями"""
@@ -60,14 +65,18 @@ class VirtualKeyboard:
             selected_letters = [self.layout[row][c] for c in range(len(self.layout[0]))]
             if current_letter in selected_letters:
                 print(f"Буква '{current_letter}' найдена в строке {row}")
+                # if cycle_count == 2:
+                #     self.user_output += current_letter
+                #     self.user_output_label.config(text=self.user_output)
+                #     print(f"Add {current_letter}")
+                return True
 
         if col is not None:  # Проверяем колонку
             selected_letters = [self.layout[r][col] for r in range(len(self.layout))]
             if current_letter in selected_letters:
                 print(f"Буква '{current_letter}' найдена в колонке {col}")
-                if cycle_count == 2:
-                    self.user_output += current_letter
-                    self.user_output_label.config(text=self.user_output)
-                    print(f"Add {current_letter}")
+                return True
+
+        return False
 
 
