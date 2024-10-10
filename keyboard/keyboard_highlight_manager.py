@@ -7,10 +7,13 @@ from keyboard.keyboard_logger import EventLogger
 class HighlightManager:
     """Класс управления подсветкой строк и столбцов"""
 
-    def __init__(self, keyboard, interval=500, interval_between_symbols=5000):
+    def __init__(self, keyboard, interval=500, interval_between_symbols=5000, interval_highlight=500):
         self.keyboard = keyboard
+
         self.interval = interval  # ms
         self.interval_between_symbols = interval_between_symbols  # ms
+        self.interval_highlight = interval_highlight
+
         self.process = None
         self.highlight_counter = 0  # Счетчик для циклов
         self.cycles = 0  # Подсчитывает, сколько раз цикл повторился
@@ -65,6 +68,10 @@ class HighlightManager:
             self.shuffled_path = random.sample(self.default_path, len(self.default_path))
 
         # Планируем следующий шаг через заданный интервал
+        self.process = self.keyboard.root.after(self.interval_highlight, self.highlight_pause)
+
+    def highlight_pause(self):
+        self.keyboard.clear_highlight()
         self.process = self.keyboard.root.after(self.interval, self.highlight_cycle_random)
 
     def check_end_of_word(self):

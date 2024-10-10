@@ -45,9 +45,7 @@ class VirtualKeyboard:
     def highlight(self, row=None, col=None):
         """Подсветка строки или столбца с закругленными белыми областями"""
         # Снятие предыдущей подсветки
-        for r in range(len(self.layout)):
-            for c in range(len(self.layout[0])):
-                self.buttons[r][c].config(bg="black", fg="sky blue")
+        self.clear_highlight()
 
         if row is not None:
             for c in range(len(self.layout[0])):

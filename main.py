@@ -25,7 +25,7 @@ def main():
         writer = csv.writer(file)
         writer.writerow(["timestamp", "row", "col", "correct"])
 
-    highlight_manager = HighlightManager(keyboard, interval=100, interval_between_symbols=5000)
+    highlight_manager = HighlightManager(keyboard, interval=100, interval_between_symbols=5000, interval_highlight=500)
     # highlight_manager.start()
 
     root.bind('<Return>', lambda event: highlight_manager.start(event=event, root=root))
