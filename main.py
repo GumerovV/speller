@@ -2,6 +2,7 @@ import tkinter as tk
 import csv
 from keyboard.keyboard_highlight_manager import HighlightManager
 from keyboard.keyboard import VirtualKeyboard
+from keyboard.keyboard_logger import EventLogger
 
 
 def main():
@@ -21,12 +22,10 @@ def main():
 
     keyboard = VirtualKeyboard(root, layout, target_word)
 
-    with open('keyboard_log_oop.csv', mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(["timestamp", "row", "col", "correct"])
+    logger = EventLogger(pathname='new_log_file.csv')
+    logger.setup()
 
-    highlight_manager = HighlightManager(keyboard, interval=100, interval_between_symbols=5000, interval_highlight=500)
-    # highlight_manager.start()
+    highlight_manager = HighlightManager(keyboard, logger, interval=1000, interval_between_symbols=5000, interval_highlight=100)
 
     root.bind('<Return>', lambda event: highlight_manager.start(event=event, root=root))
 

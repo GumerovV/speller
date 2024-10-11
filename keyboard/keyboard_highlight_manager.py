@@ -7,8 +7,9 @@ from keyboard.keyboard_logger import EventLogger
 class HighlightManager:
     """Класс управления подсветкой строк и столбцов"""
 
-    def __init__(self, keyboard, interval=500, interval_between_symbols=5000, interval_highlight=500):
+    def __init__(self, keyboard, logger, interval=500, interval_between_symbols=5000, interval_highlight=500):
         self.keyboard = keyboard
+        self.logger = logger
 
         self.interval = interval  # ms
         self.interval_between_symbols = interval_between_symbols  # ms
@@ -48,7 +49,7 @@ class HighlightManager:
             self.keyboard.highlight(row=current_el[0], col=current_el[1])
 
             letter_found = self.keyboard.check_letter(row=current_el[0], col=current_el[1], cycle_count=self.cycles)
-            EventLogger.log_event(current_el[0], current_el[1], letter_found)
+            EventLogger.log_event(self.logger.pathname, current_el[0], current_el[1], letter_found)
 
         if self.cycles >= self.max_cycles:
             self.cycles = 0
@@ -97,7 +98,7 @@ class HighlightManager:
                 self.keyboard.layout[current_row][c] == self.keyboard.target_word[self.keyboard.current_letter_idx] for
                 c in range(col_count))
             self.keyboard.check_letter(row=current_row, cycle_count=self.cycles)
-            EventLogger.log_event(current_row, None, letter_found)
+            EventLogger.log_event(self.logger.pathname, current_row, None, letter_found)
 
         # Подсветка столбца
         elif self.highlight_counter < row_count + col_count:
@@ -109,7 +110,7 @@ class HighlightManager:
                 self.keyboard.layout[r][current_col] == self.keyboard.target_word[self.keyboard.current_letter_idx] for
                 r in range(row_count))
             self.keyboard.check_letter(col=current_col, cycle_count=self.cycles)
-            EventLogger.log_event(None, current_col, letter_found)
+            EventLogger.log_event(self.logger.pathname, None, current_col, letter_found)
 
         # Увеличиваем счетчик для подсветки следующей строки или столбца
         self.highlight_counter += 1

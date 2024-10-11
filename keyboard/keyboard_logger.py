@@ -1,14 +1,23 @@
 import csv
+import datetime
 import time
 
 
 class EventLogger:
     """Класс для логирования событий"""
 
+    def __init__(self, pathname=None):
+        self.pathname = pathname if pathname else datetime.datetime.now().strftime("%Y-%m-%dT%H_%M_%S") + '.csv'
+
+    def setup(self):
+        with open(self.pathname, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["timestamp", "row", "col", "correct"])
+
     @staticmethod
-    def log_event(row, col, correct):
+    def log_event(pathname, row, col, correct):
         timestamp = time.time()
-        with open('keyboard_log_oop.csv', mode='a', newline='') as file:
+        with open(pathname, mode='a', newline='') as file:
             writer = csv.writer(file)
 
             # Логируем строку, если проверяется строка (колонка None)
