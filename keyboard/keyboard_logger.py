@@ -15,8 +15,7 @@ class EventLogger:
             writer.writerow(["timestamp", "row", "col", "correct"])
 
     @staticmethod
-    def log_event(pathname, row, col, correct):
-        timestamp = time.time()
+    def log_event(pathname, row, col, correct, timestamp):
         with open(pathname, mode='a', newline='') as file:
             writer = csv.writer(file)
 

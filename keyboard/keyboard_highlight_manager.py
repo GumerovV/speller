@@ -45,11 +45,13 @@ class HighlightManager:
     def highlight_cycle_random(self):
         """Подсветка в случайном порядке"""
         if self.shuffled_path:
+            timestamp = time.time()
+
             current_el = self.shuffled_path.pop()
             self.keyboard.highlight(row=current_el[0], col=current_el[1])
 
             letter_found = self.keyboard.check_letter(row=current_el[0], col=current_el[1], cycle_count=self.cycles)
-            EventLogger.log_event(self.logger.pathname, current_el[0], current_el[1], letter_found)
+            EventLogger.log_event(self.logger.pathname, current_el[0], current_el[1], letter_found, timestamp)
 
         if self.cycles >= self.max_cycles:
             self.cycles = 0
