@@ -45,7 +45,7 @@ class HighlightManager:
     def highlight_cycle_random(self):
         """Подсветка в случайном порядке"""
         if self.shuffled_path:
-            timestamp = time.time()
+            timestamp = int(time.time() * 1_000_000)
 
             current_el = self.shuffled_path.pop()
             self.keyboard.highlight(row=current_el[0], col=current_el[1])
