@@ -1,15 +1,18 @@
+import threading
 import time
 import random
 
 from keyboard.keyboard_logger import EventLogger
+from bci_classifier.classifier import BCIClassifier
 
 
 class HighlightManager:
     """Класс управления подсветкой строк и столбцов"""
 
-    def __init__(self, keyboard, logger, interval=500, interval_between_symbols=5000, interval_highlight=500):
+    def __init__(self, keyboard, logger, bci_client, interval=500, interval_between_symbols=5000, interval_highlight=500):
         self.keyboard = keyboard
         self.logger = logger
+        self.bci_client = bci_client
 
         self.interval = interval  # ms
         self.interval_between_symbols = interval_between_symbols  # ms
@@ -19,6 +22,8 @@ class HighlightManager:
         self.highlight_counter = 0  # Счетчик для циклов
         self.cycles = 0  # Подсчитывает, сколько раз цикл повторился
         self.max_cycles = 3  # Ограничиваем до 3 полных циклов строк и столбцов
+
+        self.eeg_data = []
 
         self.default_path = [
             [0, None],
@@ -36,11 +41,15 @@ class HighlightManager:
 
     def start(self, event, root):
         self.highlight_cycle_random()
+        self.bci_client.connect()
+        self.bci_client.start_listening()
+        self.start_eeg_polling()  # Запуск опроса данных ЭЭГ
         root.unbind('<Return>')
 
     def stop(self):
         if self.process:
             self.keyboard.root.after_cancel(self.process)
+        self.bci_client.stop_listening()
 
     def highlight_cycle_random(self):
         """Подсветка в случайном порядке"""
@@ -55,9 +64,13 @@ class HighlightManager:
 
         if self.cycles >= self.max_cycles:
             self.cycles = 0
+            print(self.eeg_data)
+            self.eeg_data = []
+
+            res = BCIClassifier.get_letter(self.eeg_data)
 
             # Добавляем букву
-            self.keyboard.user_output += self.keyboard.target_word[self.keyboard.current_letter_idx]
+            self.keyboard.user_output += res
             self.keyboard.user_output_label.config(text=self.keyboard.user_output)
 
             self.keyboard.current_letter_idx += 1
@@ -83,6 +96,19 @@ class HighlightManager:
             self.stop()
         else:
             self.highlight_cycle_random()
+
+    def start_eeg_polling(self):
+        """Запуск опроса ЭЭГ данных раз в секунду."""
+        self.eeg_polling_thread = threading.Thread(target=self.poll_eeg_data)
+        self.eeg_polling_thread.daemon = True
+        self.eeg_polling_thread.start()
+
+    def poll_eeg_data(self):
+        """Метод опроса данных ЭЭГ раз в секунду."""
+        while True:
+            eeg_value = self.bci_client.get_current_eeg()  # Получаем данные ЭЭГ от клиента
+            self.eeg_data.append(eeg_value)  # Добавляем данные ЭЭГ в массив
+            time.sleep(1.1)  # Пауза 1 секунда
 
     def highlight_cycle(self):
         """Цикл подсветки строк и столбцов с проверкой и логированием"""

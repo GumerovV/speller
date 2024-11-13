@@ -3,6 +3,7 @@ import csv
 from keyboard.keyboard_highlight_manager import HighlightManager
 from keyboard.keyboard import VirtualKeyboard
 from keyboard.keyboard_logger import EventLogger
+from bci_client.client import BCIClient
 
 
 def main():
@@ -25,7 +26,9 @@ def main():
     logger = EventLogger(pathname='new_log_file.csv')
     logger.setup()
 
-    highlight_manager = HighlightManager(keyboard, logger, interval=1000, interval_between_symbols=5000, interval_highlight=100)
+    bci_client =  BCIClient('192.168.0.23', 12345)
+
+    highlight_manager = HighlightManager(keyboard, logger, bci_client, interval=100, interval_between_symbols=1000, interval_highlight=1000)
 
     root.bind('<Return>', lambda event: highlight_manager.start(event=event, root=root))
 
