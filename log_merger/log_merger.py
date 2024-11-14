@@ -34,7 +34,7 @@ import csv
 from dataclasses import dataclass
 import json
 
-from bci_data import BCIRecord
+from bci_data import BciRecord
 from bci_log_builder import BciLogBuilder, NeiryLogBuilder, EmotivLogBuilder
 
 
@@ -49,7 +49,7 @@ class LogMerger:
         self.bci_log_builder: BciLogBuilder = bci_log_builder
 
 
-    def _read_bci_log(self, bci_file: str) -> list[BCIRecord]:
+    def _read_bci_log(self, bci_file: str) -> list[BciRecord]:
         with open(bci_file, newline='') as bci_log:
             bci_log_reader = csv.reader(bci_log, delimiter=',')
             headers = next(bci_log_reader)
@@ -83,7 +83,7 @@ class LogMerger:
 
 
     @staticmethod
-    def _find_start_of_time_interval(bci_log: list[BCIRecord], timestamp: int, start=0, end=-1) -> int:
+    def _find_start_of_time_interval(bci_log: list[BciRecord], timestamp: int, start=0, end=-1) -> int:
         if start < 0 or start >= len(bci_log):
             start = 0
         if end < 0 or end >= len(bci_log):
@@ -104,7 +104,7 @@ class LogMerger:
 
 
     @staticmethod
-    def _get_datapoint(bci_log: list[BCIRecord], speller_record: SpellerRecord, shift: int, length: int) \
+    def _get_datapoint(bci_log: list[BciRecord], speller_record: SpellerRecord, shift: int, length: int) \
             -> dict[str, list[list[float]] | bool]:
         start_position: int = LogMerger._find_start_of_time_interval(bci_log=bci_log, timestamp=speller_record.timestamp)
         if start_position == -1:
@@ -133,7 +133,7 @@ class LogMerger:
 
     def _combine_session_logs(self, bci_file: str, speller_file: str, shift: int, length: int) \
             -> list[dict[str, list[list[float]] | bool]]:
-        bci_log: list[BCIRecord] = self._read_bci_log(bci_file=bci_file)
+        bci_log: list[BciRecord] = self._read_bci_log(bci_file=bci_file)
         speller_log: list[SpellerRecord] = LogMerger._read_speller_records(speller_file=speller_file)
         return [
             LogMerger._get_datapoint(bci_log=bci_log, speller_record=speller_record, shift=shift, length=length)

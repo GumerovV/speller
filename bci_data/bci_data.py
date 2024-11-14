@@ -2,7 +2,7 @@ import abc
 from dataclasses import dataclass
 
 
-class BCISignalBatch(abc.ABC):
+class BciSignalBatch(abc.ABC):
     @abc.abstractmethod
     def get_headers(self) -> list[str]:
         ...
@@ -13,7 +13,7 @@ class BCISignalBatch(abc.ABC):
 
 
 @dataclass
-class NeiryBatch(BCISignalBatch):
+class NeiryBatch(BciSignalBatch):
     o1: float
     t3: float
     t4: float
@@ -27,7 +27,7 @@ class NeiryBatch(BCISignalBatch):
 
 
 @dataclass
-class EmotivBatch(BCISignalBatch):
+class EmotivBatch(BciSignalBatch):
     f3: float
     fc5: float
     af3: float
@@ -51,6 +51,6 @@ class EmotivBatch(BCISignalBatch):
 
 
 @dataclass
-class BCIRecord:
+class BciRecord:
     timestamp: int
-    data: BCISignalBatch
+    data: BciSignalBatch

@@ -1,1 +1,1 @@
-from .bci_data import BCIRecord, BCISignalBatch, EmotivBatch, NeiryBatch
+from .bci_data import BciRecord, BciSignalBatch, EmotivBatch, NeiryBatch

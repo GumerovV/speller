@@ -1,5 +1,5 @@
 import abc
-from bci_data import BCISignalBatch, EmotivBatch, NeiryBatch, BCIRecord
+from bci_data import BciSignalBatch, EmotivBatch, NeiryBatch, BciRecord
 
 
 class BciLogBuilder(abc.ABC):
@@ -8,7 +8,7 @@ class BciLogBuilder(abc.ABC):
         ...
 
     @abc.abstractmethod
-    def read_values(self, values: list[str]) -> BCIRecord:
+    def read_values(self, values: list[str]) -> BciRecord:
         ...
 
 
@@ -27,14 +27,14 @@ class NeiryLogBuilder(BciLogBuilder):
                 return False
         return True
     
-    def read_values(self, values: list[str]) -> BCIRecord:
+    def read_values(self, values: list[str]) -> BciRecord:
         batch: NeiryBatch = NeiryBatch(
             o1=float(values[1]),
             t3=float(values[2]),
             t4=float(values[3]),
             o2=float(values[4])
         )
-        return BCIRecord(
+        return BciRecord(
             timestamp=int(values[0]),
             data=batch
         )
@@ -78,7 +78,7 @@ class EmotivLogBuilder(BciLogBuilder):
             return True
         return False
     
-    def read_values(self, values: list[str]) -> BCIRecord:
+    def read_values(self, values: list[str]) -> BciRecord:
         batch: EmotivBatch = EmotivBatch(
             f3=float(values[1]),
             fc5=float(values[2]),
@@ -95,7 +95,7 @@ class EmotivLogBuilder(BciLogBuilder):
             fc6=float(values[13]),
             f4=float(values[14])
         )
-        return BCIRecord(
+        return BciRecord(
             timestamp=int(values[0]),
             data=batch
         )
