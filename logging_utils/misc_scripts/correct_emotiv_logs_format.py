@@ -1,7 +1,6 @@
 """
-Corrects timestamp format in speller logs, 
-written before the #e8df74 commit
-(decimal -> int without last digit)
+Corrects format of the emotiv bci logs
+(removes unnecesary headers, unnecesary columns (e.g. gyro), adds timestamps for each record)
 """
 
 
