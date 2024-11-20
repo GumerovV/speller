@@ -3,7 +3,7 @@ import time
 import random
 
 from keyboard.keyboard_logger import EventLogger
-from bci_classifier.classifier import BCIClassifier
+from classifier import RandomClassifier
 
 
 class HighlightManager:
@@ -13,6 +13,7 @@ class HighlightManager:
         self.keyboard = keyboard
         self.logger = logger
         self.bci_client = bci_client
+        self.classifier = RandomClassifier()
 
         self.interval = interval  # ms
         self.interval_between_symbols = interval_between_symbols  # ms
@@ -67,10 +68,10 @@ class HighlightManager:
             print(self.eeg_data)
             self.eeg_data = []
 
-            res = BCIClassifier.get_letter(self.eeg_data)
-
+            res =  self.classifier.classifiy(self.eeg_data)
+            print(res)
             # Добавляем букву
-            self.keyboard.user_output += res
+            self.keyboard.user_output += 'H'
             self.keyboard.user_output_label.config(text=self.keyboard.user_output)
 
             self.keyboard.current_letter_idx += 1
