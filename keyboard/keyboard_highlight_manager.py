@@ -38,6 +38,15 @@ class HighlightManager:
             [None, 3],
             [None, 4],
         ]
+
+        self.probability_mass =  [
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+        ]
+
         self.shuffled_path = random.sample(self.default_path, len(self.default_path))
 
     def start(self, event, root):
@@ -63,15 +72,18 @@ class HighlightManager:
             letter_found = self.keyboard.check_letter(row=current_el[0], col=current_el[1], cycle_count=self.cycles)
             EventLogger.log_event(self.logger.pathname, current_el[0], current_el[1], letter_found, timestamp)
 
+
+            eeg_value = self.bci_client.get_current_eeg()
+            print(eeg_value)
+            classifier_res = self.classifier.classifiy(eeg_value)
+            self.calculate_letters(row=current_el[0], col=current_el[1],value=classifier_res)
+
         if self.cycles >= self.max_cycles:
             self.cycles = 0
-            print(self.eeg_data)
             self.eeg_data = []
 
-            res =  self.classifier.classifiy(self.eeg_data)
-            print(res)
             # Добавляем букву
-            self.keyboard.user_output += 'H'
+            self.keyboard.user_output += self.get_letter()
             self.keyboard.user_output_label.config(text=self.keyboard.user_output)
 
             self.keyboard.current_letter_idx += 1
@@ -106,10 +118,11 @@ class HighlightManager:
 
     def poll_eeg_data(self):
         """Метод опроса данных ЭЭГ раз в секунду."""
-        while True:
-            eeg_value = self.bci_client.get_current_eeg()  # Получаем данные ЭЭГ от клиента
-            self.eeg_data.append(eeg_value)  # Добавляем данные ЭЭГ в массив
-            time.sleep(1.1)  # Пауза 1 секунда
+        # while True:
+        #     eeg_value = self.bci_client.get_current_eeg()  # Получаем данные ЭЭГ от клиента
+        #     self.eeg_data.append(eeg_value)  # Добавляем данные ЭЭГ в массив
+        #     time.sleep(1.1)  # Пауза 1 секунда
+        pass
 
     def highlight_cycle(self):
         """Цикл подсветки строк и столбцов с проверкой и логированием"""
@@ -161,4 +174,39 @@ class HighlightManager:
 
         # Планируем следующий шаг через заданный интервал
         self.process = self.keyboard.root.after(self.interval, self.highlight_cycle)
+
+    def find_max_element(self):
+        max_value = float('-inf')
+        max_position = (-1, -1)
+
+        for row_idx, row in enumerate(self.probability_mass):
+            for col_idx, value in enumerate(row):
+                if value > max_value:
+                    max_value = value
+                    max_position = (row_idx, col_idx)
+
+        return max_position
+
+    def calculate_letters(self, row = None, col = None, value = None):
+        if row is None:
+            for r in range(len(self.probability_mass)):
+                self.probability_mass[r][col] += value
+        else:
+            for c in range(len(self.probability_mass[row])):
+                self.probability_mass[row][c] += value
+
+    def get_letter(self):
+        pos_letter = self.find_max_element()
+
+        self.probability_mass = [
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+        ]
+
+        return self.keyboard.layout[pos_letter[0]][pos_letter[1]]
+
+
 
